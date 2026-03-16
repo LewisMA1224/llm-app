@@ -7,12 +7,21 @@ load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
 
+
+def load_system_prompt():
+    prompt_path = "prompts/system_prompt.txt"
+    if os.path.exists(prompt_path):
+        with open(prompt_path, "r", encoding="utf-8") as file:
+            return file.read().strip()
+    return "You are a helpful beginner-friendly AI assistant."
+
+
 st.set_page_config(page_title="My First LLM App")
 st.title("My First LLM App")
 
-system_prompt = st.text_area(
-    "System Prompt", value="You are a helpful beginner-friendly AI assistant."
-)
+default_system_prompt = load_system_prompt()
+
+system_prompt = st.text_area("System Prompt", value=default_system_prompt)
 
 user_prompt = st.text_area("User Prompt")
 

@@ -1,49 +1,106 @@
 import os
 from dotenv import load_dotenv
 import streamlit as st
-from openai import OpenAI
+from openai import (
+    APIConnectionError,
+    APIError,
+    AuthenticationError,
+    BadRequestError,
+    OpenAI,
+    RateLimitError,
+)
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
+APP_TITLE = "My First LLM App"
+MODEL_NAME = "gpt-5-nano"
+SYSTEM_PROMPT_PATH = "prompts/system_prompt.txt"
+DEFAULT_SYSTEM_PROMPT = "You are a helpful beginner-friendly AI assistant."
+
+ASSISTANT_MODES = {
+    "General Assistant": "Give practical, concise help in plain language.",
+    "Interview Coach": "Explain your thinking clearly and include short examples.",
+    "Code Explainer": "Break down code step by step for a beginner.",
+}
 
 
 def load_system_prompt():
-    prompt_path = "prompts/system_prompt.txt"
-    if os.path.exists(prompt_path):
-        with open(prompt_path, "r", encoding="utf-8") as file:
-            return file.read().strip()
-    return "You are a helpful beginner-friendly AI assistant."
+    if not os.path.exists(SYSTEM_PROMPT_PATH):
+        return DEFAULT_SYSTEM_PROMPT
+
+    try:
+        with open(SYSTEM_PROMPT_PATH, "r", encoding="utf-8") as file:
+            prompt = file.read().strip()
+            return prompt or DEFAULT_SYSTEM_PROMPT
+    except OSError:
+        # Fallback keeps the app usable even if file permissions/path are broken.
+        return DEFAULT_SYSTEM_PROMPT
 
 
-st.set_page_config(page_title="My First LLM App")
-st.title("My First LLM App")
+def build_system_prompt(base_prompt, selected_mode):
+    mode_instruction = ASSISTANT_MODES[selected_mode]
+    return f"{base_prompt}\n\nMode instruction: {mode_instruction}"
 
-default_system_prompt = load_system_prompt()
 
-system_prompt = st.text_area("System Prompt", value=default_system_prompt)
+def get_response(client, system_prompt, user_prompt):
+    response = client.responses.create(
+        model=MODEL_NAME,
+        input=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+    return response.output_text
 
-user_prompt = st.text_area("User Prompt")
 
-if st.button("Run"):
-    if not api_key:
-        st.error("Missing OPENAI_API_KEY in your .env file.")
-    elif not user_prompt.strip():
-        st.warning("Please enter a user prompt.")
-    else:
+def main():
+    api_key = os.getenv("OPENAI_API_KEY")
+
+    st.set_page_config(page_title=APP_TITLE)
+    st.title(APP_TITLE)
+
+    default_system_prompt = load_system_prompt()
+
+    assistant_mode = st.selectbox("Assistant Mode", list(ASSISTANT_MODES.keys()))
+    system_prompt = st.text_area(
+        "System Prompt", value=default_system_prompt, height=180
+    )
+    user_prompt = st.text_area("User Prompt", placeholder="Ask me anything...")
+
+    if st.button("Run", type="primary"):
+        if not api_key:
+            st.error(
+                "Missing OPENAI_API_KEY. Add it to your .env file and restart Streamlit."
+            )
+            return
+
+        if not user_prompt.strip():
+            st.warning("Please enter a user prompt before running.")
+            return
+
+        final_system_prompt = build_system_prompt(system_prompt, assistant_mode)
+
         try:
             client = OpenAI(api_key=api_key)
-
-            response = client.responses.create(
-                model="gpt-5-nano",
-                input=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-            )
+            with st.spinner("Thinking..."):
+                answer = get_response(client, final_system_prompt, user_prompt)
 
             st.subheader("Response")
-            st.write(response.output_text)
+            st.write(answer)
 
-        except Exception as e:
-            st.error(f"Something went wrong: {e}")
+        except AuthenticationError:
+            st.error("Authentication failed. Check your OPENAI_API_KEY and try again.")
+        except RateLimitError:
+            st.error("Rate limit hit. Wait a moment and try again.")
+        except APIConnectionError:
+            st.error("Could not connect to OpenAI. Check your internet connection.")
+        except BadRequestError as err:
+            st.error(f"Request error: {err}")
+        except APIError as err:
+            st.error(f"OpenAI API error: {err}")
+        except Exception as err:
+            st.error(f"Unexpected error: {err}")
+
+
+if __name__ == "__main__":
+    main()

@@ -10,3 +10,5 @@ Build a simple app that takes a user prompt and returns an AI-generated response
 - simple prompt flow
 - use GitHub Copilot for help
 - later connect a real model API
+Connected to VS Code successfully.
+

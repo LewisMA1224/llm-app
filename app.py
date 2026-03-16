@@ -23,6 +23,12 @@ ASSISTANT_MODES = {
     "Code Explainer": "Break down code step by step for a beginner.",
 }
 
+EXAMPLE_PROMPTS = {
+    "Summarize a concept": "Explain what a Python virtual environment is in simple terms.",
+    "Learn by steps": "Teach me how an API request works, step by step.",
+    "Code explanation": "Explain this line: response = client.responses.create(...)",
+}
+
 
 def load_system_prompt():
     if not os.path.exists(SYSTEM_PROMPT_PATH):
@@ -62,10 +68,20 @@ def main():
     default_system_prompt = load_system_prompt()
 
     assistant_mode = st.selectbox("Assistant Mode", list(ASSISTANT_MODES.keys()))
+
+    selected_example = st.selectbox(
+        "Quick Example Prompt (optional)",
+        ["None"] + list(EXAMPLE_PROMPTS.keys()),
+    )
+    if st.button("Use Example Prompt") and selected_example != "None":
+        st.session_state["user_prompt"] = EXAMPLE_PROMPTS[selected_example]
+
     system_prompt = st.text_area(
         "System Prompt", value=default_system_prompt, height=180
     )
-    user_prompt = st.text_area("User Prompt", placeholder="Ask me anything...")
+    user_prompt = st.text_area(
+        "User Prompt", placeholder="Ask me anything...", key="user_prompt"
+    )
 
     if st.button("Run", type="primary"):
         if not api_key:

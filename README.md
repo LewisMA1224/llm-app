@@ -1,68 +1,67 @@
 # Streamlit + OpenAI Chatbot
 
-A beginner-friendly chatbot project built with Streamlit and the OpenAI API. It is intentionally small, readable, and easy to explain in an interview.
+A simple beginner portfolio project that shows how to build a clean AI chatbot UI with Streamlit and connect it to the OpenAI API.
 
-![App Screenshot](assets/app-screenshot.png)
+## Screenshot
 
-> Screenshot placement recommendation: keep this image directly under the project title/summary so recruiters and reviewers see the UI immediately.
+Main app screen:
+
+![Chatbot App Screenshot](images/app-screenshot.png)
 
 ## Why This Project
-- Shows end-to-end API integration in a real UI
-- Demonstrates prompt control through editable system prompts
-- Includes basic product thinking with assistant modes
-- Handles common API failures with clear user-facing errors
+
+- Keeps the scope small and clear
+- Demonstrates prompt design with an editable system prompt
+- Uses assistant modes to show product thinking
+- Handles common API errors in a user-friendly way
 
 ## Features
-- Clean Streamlit interface
-- Assistant mode dropdown with 3 modes:
+
+- Streamlit web interface
+- Assistant mode dropdown:
   - General Assistant
   - Interview Coach
   - Code Explainer
-- Editable system prompt loaded from `prompts/system_prompt.txt`
-- OpenAI Responses API call using `gpt-5-nano`
-- Friendly error handling for missing keys, rate limits, network issues, and bad requests
+- Editable system prompt from prompts/system_prompt.txt
+- OpenAI Responses API call with gpt-5-nano
+- Clear error messages for missing keys, auth issues, rate limits, and network failures
 
 ## Project Structure
-```text
+
 .
-├── app.py
-├── requirements.txt
-├── prompts/
-│   └── system_prompt.txt
-└── README.md
-```
+|- app.py
+|- README.md
+|- requirements.txt
+|- images/
+|  |- app-screenshot.png
+|- prompts/
+|  |- system_prompt.txt
 
 ## Quick Start
-1. Clone this repository.
+
+1. Clone the repository.
 2. Create and activate a virtual environment.
-3. Install dependencies:
-	```bash
-	pip install -r requirements.txt
-	```
-4. Create a `.env` file in the root folder:
-	```env
-	OPENAI_API_KEY=your_api_key_here
-	```
-5. Run the app:
-	```bash
-	streamlit run app.py
-	```
+3. Install dependencies with pip install -r requirements.txt.
+4. Create a .env file in the project root:
+   OPENAI_API_KEY=your_api_key_here
+5. Run the app with streamlit run app.py.
 
 ## How It Works
-1. Load environment variables and optional base system prompt.
-2. Let the user choose an assistant mode from a dropdown.
-3. Combine base prompt + mode instruction.
-4. Send user input to the OpenAI API.
-5. Display the model response or a helpful error message.
+
+1. Loads environment variables and a default system prompt.
+2. Lets the user pick an assistant mode.
+3. Combines base prompt and mode instruction.
+4. Sends the user prompt to OpenAI.
+5. Renders the model response in the app.
 
 ## Interview Talking Points
-- Why a small app first: easier debugging, faster iteration, clearer explanation.
-- How prompt design changes behavior without changing model code.
-- How specific error messages improve user experience.
-- How to keep code modular without introducing heavy architecture.
 
-## Next Improvements (Still Simple)
-- Add chat history in session state
-- Add model selection dropdown
-- Add basic input/output logging for debugging
+- Why a small project is easier to test and explain
+- How prompt instructions shape assistant behavior
+- Why clear error messages improve usability
+- How to structure code cleanly without overengineering
+
+## Next Small Improvement
+
+Add a quick example prompt picker so first-time users can test the app in one click.
 
